@@ -1,0 +1,4 @@
+D:\acad\disc\compil\compil_u02_lexico
+ExercicioLexico.doc
+\Windows\System32
+sa&$\Windows\System32

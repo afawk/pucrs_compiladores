@@ -1,0 +1,9 @@
+{
+ "id": 1,
+ "name": "Toner para Impressora XK 4532",
+ "price": 219.23,
+ "tags": [ "Toner", "4532" ],
+ "stock": {
+ "shopping iguatemi": 3
+ }
+}

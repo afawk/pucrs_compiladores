@@ -1,0 +1,33 @@
+
+import java.utils.*;
+
+public class Teste extends Abc implements Def
+{
+	private String t;
+	/**
+	* Construtor
+	*/
+	Teste()
+	{
+		t = new abc();
+	}
+
+	public void hello()
+	{
+		for (int x = 0; x < 5; x++) {
+			abc.flush();
+		}
+	}
+
+	private String haa(int as, float sua)
+	{
+		if (as == null || sua == null) {
+			return "putz";
+		}
+		else {
+			abc.hup(as * 3, sua / 12.9);
+		}
+
+		return abc;
+	}
+}

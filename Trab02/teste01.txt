@@ -1,0 +1,4 @@
+$TRACE_ON
+    int a; { a = 34; }
+
+

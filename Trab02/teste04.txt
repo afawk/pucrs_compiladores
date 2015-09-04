@@ -1,0 +1,5 @@
+$TRACE_ON
+
+    int a, b  { while (b) a= 34; }
+   
+

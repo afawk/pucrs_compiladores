@@ -1,0 +1,15 @@
+$TRACE_ON
+
+int a, b, c;
+
+double calcularFrequencia(int aulas, int frequenc) {
+
+    double temp;
+
+    temp = 0;
+
+    return temp;
+
+}
+
+void main() { a = calcularFrequencia(b,c); }

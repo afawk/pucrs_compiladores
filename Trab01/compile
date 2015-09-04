@@ -1,0 +1,20 @@
+#!/bin/bash
+
+##
+# Anderson Jean Fraga
+# 13180375
+# Compiladores - Trabalho 1 - Execute
+##
+
+file="Lexica_0$1"
+
+if [[ -f "$file.flex" ]]; then
+    ucfile="$(tr '[:lower:]' '[:upper:]' <<< ${file:0:1})${file:1}"
+    rm $file.{java,java~,html}
+
+    jflex $file.flex
+    javac $ucfile.java
+    java $ucfile $file.txt
+else
+    echo "File '${file}.flex' not found. Create, too, '${file}.txt' to test"
+fi
