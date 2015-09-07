@@ -1,0 +1,15 @@
+$TRACE_ON
+
+bool calcula(int g1, int aulas, int faltas) {
+    bool fazG2;
+    fazG2 =  !(g1<4) && (g1<7) && !(calculaFreq(aulas,faltas)<75/100);
+    return fazG2;
+}
+
+int calculaFreq(int aulas, int faltas) {
+    return 12;
+}
+
+void main() {
+    echo calcula(1,2,3);
+}
