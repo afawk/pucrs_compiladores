@@ -1,6 +1,6 @@
 $TRACE_ON
 
-int a, b, c;
+int a, int b, int c;
 
 double calcularFrequencia(int aulas, int frequenc) {
 

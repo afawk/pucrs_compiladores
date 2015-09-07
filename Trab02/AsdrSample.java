@@ -66,24 +66,51 @@ public class AsdrSample {
     }
     void main() { a = calcularFrequencia(b,c); }
 
-    Prog -> LDecl | &
-    LDecl -> Tipo IDENT RestDecl Prog
+
+    Prog -> DeclList | &
+    DeclList -> Tipo IDENT RestDecl Prog
     RestDecl -> ElmDecl ; | ( RestMet
-    ElmDecl -> , IDENT ElmDecl | &
+    ElmDecl -> , Tipo IDENT ElmDecl | &
     RestMet -> Tipo IDENT ElmDecl CmdFun | CmdFun
     CmdFun -> ) { Cmd }
     Cmd -> WHILE ( E ) Cmd
           | Tipo IDENT ;
-          | IDENT = Asses ;
+          | IDENT = E ;
           | IF ( E ) Cmd RestoIF
           | return IDENT ;
+
+    E --> B ">" B | B "<" B | B
+
+    B -> F RestB
+
+    RestB --> "&&" C
+        | "||" C
+        | RestC
+
+    C -> F RestC
+
+    RestC --> "+" D
+        | "-" D
+        | RestD
+
+    D -> F RestD
+    RestD --> "*" F
+        | "/" F
+        | &
+
+    F --> NUM | "!"E | "("E")" | IDENT RestF
+    RestF -> "("InitLEx")"
+          | &
+
+    InitLEx -> LEx | &
+
+    LEx --> E RestLEx
+    RestLEx -> "," LEx | &
+
     RestoIF -> ELSE Cmd | &
-    Comp -> NUM | IDENT | ( Comp ) |
-    Asses -> IDENT RestE
-    RestE -> ( RestArg | Comp
-    RestArg -> ) ; | IDENT ArgList ) ;
-    ArgList -> , IDENT ArgList
-            | &
+
+    Tipo -> int | double | bool | void;
+
 
   */
 

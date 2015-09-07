@@ -1,4 +1,9 @@
 $TRACE_ON
 
-    int a, b; { while (b) a= 34; }
+int a, int b;
+
+void main(int a) {
+    while (b)
+        a= 34;
+}
 

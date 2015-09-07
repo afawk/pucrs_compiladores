@@ -1,16 +1,20 @@
-JFLEX  = java -jar JFlex.jar 
+JFLEX  = jflex
 JAVAC  = javac
 
 # targets:
 
-all: AsdrSample.class
+all: AsdrParser.class
+
+rebuild: clean AsdrParser.class
 
 clean:
 	rm -f *~ *.class Yylex.java
 
-AsdrSample.class: AsdrSample.java Yylex.java
-	$(JAVAC) AsdrSample.java
+AsdrParser.class: Yylex.java
+	$(JAVAC) ParserTokens.java
+	$(JAVAC) ParserVal.java
+	$(JAVAC) AsdrGrammar.java
+	$(JAVAC) AsdrParser.java
 
 Yylex.java: asdr_lex.flex
 	$(JFLEX) asdr_lex.flex
-

@@ -1,4 +1,6 @@
 $TRACE_ON
-    int a; { a = 34; }
+int a;
+
+void abc() { a = 34; }
 
 

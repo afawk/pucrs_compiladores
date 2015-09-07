@@ -1,5 +1,7 @@
 $TRACE_ON
 
-{ a = 34;}
+void main(){
+    echo 34;
+}
 
 

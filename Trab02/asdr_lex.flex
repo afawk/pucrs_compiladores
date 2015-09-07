@@ -4,11 +4,16 @@
 %{
   private int comment_count = 0;
 
-  private AsdrSample yyparser;
+  private AsdrParser yyparser;
 
-  public Yylex(java.io.Reader r, AsdrSample yyparser) {
+  public Yylex(java.io.Reader r, AsdrParser yyparser) {
     this(r);
     this.yyparser = yyparser;
+  }
+
+  public int getLine()
+  {
+    return yyline;
   }
 
 
@@ -25,20 +30,25 @@ WHITE_SPACE_CHAR=[\n\r\ \t\b\012]
 "$TRACE_ON"   { yyparser.setDebug(true); }
 "$TRACE_OFF"  { yyparser.setDebug(false); }
 
-"int"       { return AsdrSample.INT; }
-"bool"      { return AsdrSample.BOOL; }
-"void" 		{ return AsdrSample.VOID; }
-"double"	{ return AsdrSample.DOUBLE; }
-"while"	 	{ return AsdrSample.WHILE; }
-"if"		{ return AsdrSample.IF; }
-"else"      { return AsdrSample.ELSE; }
-"return"	{ return AsdrSample.RETURN; }
+"int"       { return ParserTokens.INT; }
+"bool"      { return ParserTokens.BOOL; }
+"void" 		{ return ParserTokens.VOID; }
+"double"	{ return ParserTokens.DOUBLE; }
+"while"	 	{ return ParserTokens.WHILE; }
+"if"		{ return ParserTokens.IF; }
+"else"      { return ParserTokens.ELSE; }
+"return"	{ return ParserTokens.RETURN; }
 
-[:jletter:][:jletterdigit:]* { return AsdrSample.IDENT; }
+[:jletter:][:jletterdigit:]* { return ParserTokens.IDENT; }
 
-[0-9]+ 	{ return AsdrSample.NUM; }
+[0-9]+ 	{ return ParserTokens.NUM; }
 
+"&&" { return ParserTokens.AND_OP; }
+"||" { return ParserTokens.OR_OP; }
+"!"  { return ParserTokens.NOT_OP; }
 
+">" |
+"<" |
 ";" |
 "," |
 "{" |
@@ -46,6 +56,9 @@ WHITE_SPACE_CHAR=[\n\r\ \t\b\012]
 "(" |
 ")" |
 "+" |
+"-" |
+"*" |
+"/" |
 "="    	{ return yytext().charAt(0); }
 
 
