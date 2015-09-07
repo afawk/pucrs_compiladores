@@ -2,3 +2,4 @@
 *.jar
 *.zip
 */latex/*
+Yylex.java
