@@ -12,20 +12,21 @@ class AsdrParser {
             else
                 parser = new AsdrParser(new java.io.FileReader(args[0]));
 
-            parser.setDebug(false);
             laToken = parser.yylex();
 
             AsdrGrammar adsr = new AsdrGrammar(parser);
             adsr.run();
 
-            if (laToken == Yylex.YYEOF)
+            if (parser.isEOF())
                 System.out.println("\n\nSucesso!");
             else
                 System.out.println("\n\nFalhou - esperado EOF.");
-
         }
         catch (java.io.FileNotFoundException e) {
             System.out.println("File not found : \""+args[0]+"\"");
+        }
+        catch (Exception e) {
+            System.out.println("Ops! " + e.getMessage());
         }
     }
 
@@ -34,7 +35,7 @@ class AsdrParser {
     public ParserVal yylval;
 
     private static int laToken;
-    private boolean debug;
+    private boolean debug = false;
 
     public AsdrParser(Reader r)
     {
@@ -64,6 +65,11 @@ class AsdrParser {
         }
 
         return retVal; //retorna o token para o Parser
+    }
+
+    public boolean isEOF()
+    {
+        return laToken == Yylex.YYEOF;
     }
 
     public AsdrParser check(int expected)
@@ -124,9 +130,9 @@ class AsdrParser {
 
     public void debug(String msg, int exitable)
     {
-        /*if ((!this.debug || !yydebug) && exitable == 0) {
+        if (this.debug == false && exitable == 0) {
             return;
-        }*/
+        }
 
         System.out.println(msg);
 

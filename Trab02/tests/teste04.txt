@@ -1,6 +1,7 @@
 $TRACE_ON
 
-int a, bool b;
+int a;
+bool b;
 
 int teste() {
     while (b) a= 34;

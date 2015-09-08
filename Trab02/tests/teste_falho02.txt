@@ -1,5 +1,7 @@
 $TRACE_OFF
 
+unexpectedtype a;
+
 void main() {
     bool nok;
     nok = a < b < c;

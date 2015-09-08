@@ -20,6 +20,9 @@ public class AsdrGrammar
         if (ParserTokens.isTypeDecl(parser.getActualToken())) {
             DeclList();
         }
+        else if (!parser.isEOF()) {
+            parser.errorExpected("INT | DOUBLE | BOOL | VOID");
+        }
     }
 
     private void DeclList()
@@ -45,7 +48,7 @@ public class AsdrGrammar
         parser.check(ParserTokens.IDENT);
 
         if (parser.isActualToken(',')) {
-            DeclElement();
+            DeclProperty();
         }
         else if (parser.isActualToken('(')) {
             DeclMethod();
@@ -55,6 +58,19 @@ public class AsdrGrammar
             parser.check(';');
             Program();
         }
+    }
+
+    private void DeclProperty()
+    {
+        parser.consoleMsg("DeclProperty");
+
+        if (!parser.isActualToken(',')) {
+            return;
+        }
+
+        parser.check(',').check(ParserTokens.IDENT);
+
+        DeclProperty();
     }
 
     private void DeclElement()
