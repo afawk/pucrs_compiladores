@@ -1,7 +1,11 @@
 JFLEX  = jflex
 JAVAC  = javac
 
-# targets:
+##
+# Anderson Jean Fraga
+# 13180375
+# Compiladores - Trabalho 2
+##
 
 all: AsdrParser.class
 
