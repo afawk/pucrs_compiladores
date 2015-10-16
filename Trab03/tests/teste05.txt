@@ -1,0 +1,7 @@
+$TRACE_ON
+
+void main(){
+    int a = 1;
+}
+
+

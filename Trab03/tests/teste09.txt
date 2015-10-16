@@ -1,0 +1,36 @@
+$TRACE_ON
+int a, b;
+
+double teste(int x, bool y) {
+    int j = 1;
+    int k = looping(1, a + x);
+
+    if (j > k) {
+        return j/0.1;
+    }
+    else {
+        j = j + 1;
+    }
+
+    return j;
+}
+
+int looping(int x, int m) {
+    int t = 0;
+
+    for (int n = 0, g = 0; n < (m + 1); n++) {
+        g = g + 1;
+
+        t = (g > 10);
+
+        if (t) {
+            break;
+        }
+    }
+
+    if (t) {
+        return g;
+    }
+
+    return x;
+}

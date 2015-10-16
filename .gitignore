@@ -1,4 +1,7 @@
+*.php
+bkp.*
 *.pdf
+*.tar
 *.class
 *.jar
 *.zip
