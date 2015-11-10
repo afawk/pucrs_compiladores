@@ -3,6 +3,7 @@ bkp.*
 *.pdf
 *.tar
 *.class
+*.java~
 *.jar
 *.zip
 */latex/*

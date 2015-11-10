@@ -1,0 +1,6 @@
+$TRACE_OFF
+
+void main() {
+    bool nok;
+    nok = a < b < c;
+}

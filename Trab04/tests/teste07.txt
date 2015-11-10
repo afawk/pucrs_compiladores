@@ -1,0 +1,15 @@
+$TRACE_ON
+
+int calculaFreq(int aulas, int faltas) {
+    return 12;
+}
+
+bool calcula(int g1, int aulas, int faltas) {
+    bool fazG2 = 0;
+    fazG2 =  !(g1<4) && (g1<7) && !(calculaFreq(aulas,faltas)<75/100);
+    return fazG2;
+}
+
+void main() {
+    bool a = calcula(1,2,3);
+}

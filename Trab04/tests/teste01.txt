@@ -1,0 +1,3 @@
+int ab;
+
+int dec(int a) { a = 34; }

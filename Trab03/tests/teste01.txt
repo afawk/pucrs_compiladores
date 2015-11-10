@@ -1,4 +1,3 @@
-$TRACE_ON
 int ab;
 
 int dec() { a = 34; }
