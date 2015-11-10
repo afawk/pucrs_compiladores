@@ -123,8 +123,6 @@ public class SymbolTable
 
     public SymbolType validTypesLogic(SymbolType item, SymbolType compare)
     {
-        System.out.println(item.name() + " - " + compare.name());
-
         if (item.name().equals("bool") && compare.name().equals("bool")) {
             return new SymbolType("bool");
         }
@@ -136,8 +134,6 @@ public class SymbolTable
 
     public SymbolType validTypesLogic(SymbolType item)
     {
-        System.out.println(item.name());
-
         if (item.name().equals("bool") ) {
             return item;
         }
@@ -149,14 +145,11 @@ public class SymbolTable
 
     public SymbolType validTypesComp(SymbolType item, SymbolType compare)
     {
-        System.out.println(item.name() + " " + compare.name());
-
         boolean itemIsNumber = (item.name().equals("num") || item.name().equals("int") || item.name().equals("double") || item.name().equals("literal"));
 
         boolean compareIsNumber = (compare.name().equals("num") || compare.name().equals("int") || compare.name().equals("double") || compare.name().equals("literal"));
 
         if (itemIsNumber && compareIsNumber) {
-            System.out.println("Foi!");
             return new SymbolType("bool");
         }
 
@@ -254,6 +247,8 @@ public class SymbolTable
         if (map.containsKey(identifier)) {
             return (SymbolType) map.get(identifier).type();
         }
+
+        fatalError("Função '"+identifier+"' não localizada, linha "+lexer.getLine());
 
         return null;
     }
