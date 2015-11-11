@@ -58,17 +58,18 @@ argsListComma : ',' argRule argsListComma
               ;
 
 
-statementList : statement statementList
+statementList : statementList statement
               |
               ;
 
-statement : scopeFunVarDecls ';' { symbolType = null; }
+statement : '{' statementList '}'
+          | scopeFunVarDecls ';' { symbolType = null; }
           | attribWithExpr ';' { symbolType = null; }
           | RETURN expression { symbolTable.validReturn(head, (SymbolType) $2); } ';'
-          | FOR '(' { head = symbolTable.addScope(head, "for"); } scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' { symbolTable.scoppedLoopIncr(); }  statementElements
-          | WHILE  { head = symbolTable.addScope(head, "while"); } '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $4); } ')' { symbolTable.scoppedLoopIncr(); } statementElements
-          | DO  { head = symbolTable.addScope(head, "do-while"); } { symbolTable.scoppedLoopIncr(); } statementElements WHILE '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $7); } ')'
-          | IF '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $3); } ')' statementElements elseifStatement
+          | FOR '(' { head = symbolTable.addScope(head, "for"); } scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' { symbolTable.scoppedLoopIncr(); }  statement
+          | WHILE  { head = symbolTable.addScope(head, "while"); } '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $4); } ')' { symbolTable.scoppedLoopIncr(); } statement
+          | DO  { head = symbolTable.addScope(head, "do-while"); } { symbolTable.scoppedLoopIncr(); } statement WHILE '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $7); } ')'
+          | IF '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $3); } ')' statement elseifStatement
           | BREAK { symbolTable.scoppedLoopCheck("break"); } ';'
           | CONTINUE { symbolTable.scoppedLoopCheck("continue"); } ';'
           | SWITCH '(' expression ')' '{' listSwitchCase '}'
@@ -85,7 +86,7 @@ extendScopeForVars : ',' attribScopeForVars
                    |
                    ;
 
-elseifStatement : ELSE statementElements
+elseifStatement : ELSE statement
                 |
                 ;
 
@@ -100,10 +101,6 @@ attribWithExpr : IDENT ATTRIB expression {
  }
                ;
 
-statementElements : statement
-                  | '{' statementList '}'
-                  ;
-
 listSwitchCase : CASE validCaseSwitch statementSwitchCase
                | DEFAULT statementSwitchCase
                |
@@ -115,7 +112,7 @@ validCaseSwitch : IDENT   { $$ = symbolTable.modelateResult(head, new SymbolType
                 | FALSE   { $$ = new SymbolType("bool", $1); }
                 ;
 
-statementSwitchCase : ':' statementElements listSwitchCase
+statementSwitchCase : ':' statement listSwitchCase
                     ;
 
 scopeFunVarDecls : typeVar { symbolType = $1; } listScopeFunVar
