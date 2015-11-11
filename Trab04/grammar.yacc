@@ -15,6 +15,7 @@
 %left '+' '-'
 %left AND OR XOR
 %left '('
+%nonassoc NO_ELSE
 
 %start program
 
@@ -69,11 +70,19 @@ statement : '{' statementList '}'
           | FOR '(' { head = symbolTable.addScope(head, "for"); } scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' { symbolTable.scoppedLoopIncr(); }  statement
           | WHILE  { head = symbolTable.addScope(head, "while"); } '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $4); } ')' { symbolTable.scoppedLoopIncr(); } statement
           | DO  { head = symbolTable.addScope(head, "do-while"); } { symbolTable.scoppedLoopIncr(); } statement WHILE '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $7); } ')'
-          | IF '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $3); } ')' statement elseifStatement
+          | ifStatement
           | BREAK { symbolTable.scoppedLoopCheck("break"); } ';'
           | CONTINUE { symbolTable.scoppedLoopCheck("continue"); } ';'
           | SWITCH '(' expression ')' '{' listSwitchCase '}'
           ;
+
+ifStatement : ifStatementWithoutElse %prec NO_ELSE
+            | ifStatementWithoutElse ELSE statement
+            ;
+
+ifStatementWithoutElse : IF '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $3); } ')' statement
+                        ;
+
 
 scopeForVarDecls : typeVar { symbolType = $1; } attribScopeForVars
                  |
@@ -85,10 +94,6 @@ attribScopeForVars : IDENT ATTRIB expression { symbolTable.addVar(head, new Symb
 extendScopeForVars : ',' attribScopeForVars
                    |
                    ;
-
-elseifStatement : ELSE statement
-                |
-                ;
 
 attribWithExpr : IDENT ATTRIB expression {
   if (symbolType == null) {

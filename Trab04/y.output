@@ -41,70 +41,69 @@
   22  argsListComma : ',' argRule argsListComma
   23                |
 
-  24  statementList : statement statementList
+  24  statementList : statementList statement
   25                |
 
-  26  statement : scopeFunVarDecls ';'
-  27            | attribWithExpr ';'
+  26  statement : '{' statementList '}'
+  27            | scopeFunVarDecls ';'
+  28            | attribWithExpr ';'
 
-  28  $$8 :
+  29  $$8 :
 
-  29  statement : RETURN expression $$8 ';'
+  30  statement : RETURN expression $$8 ';'
 
-  30  $$9 :
+  31  $$9 :
 
-  31  $$10 :
+  32  $$10 :
 
-  32  statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statementElements
+  33  statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statement
 
-  33  $$11 :
+  34  $$11 :
 
-  34  $$12 :
+  35  $$12 :
 
-  35  $$13 :
+  36  $$13 :
 
-  36  statement : WHILE $$11 '(' expression $$12 ')' $$13 statementElements
+  37  statement : WHILE $$11 '(' expression $$12 ')' $$13 statement
 
-  37  $$14 :
+  38  $$14 :
 
-  38  $$15 :
+  39  $$15 :
 
-  39  $$16 :
+  40  $$16 :
 
-  40  statement : DO $$14 $$15 statementElements WHILE '(' expression $$16 ')'
+  41  statement : DO $$14 $$15 statement WHILE '(' expression $$16 ')'
+  42            | ifStatement
 
-  41  $$17 :
+  43  $$17 :
 
-  42  statement : IF '(' expression $$17 ')' statementElements elseifStatement
+  44  statement : BREAK $$17 ';'
 
-  43  $$18 :
+  45  $$18 :
 
-  44  statement : BREAK $$18 ';'
-
-  45  $$19 :
-
-  46  statement : CONTINUE $$19 ';'
+  46  statement : CONTINUE $$18 ';'
   47            | SWITCH '(' expression ')' '{' listSwitchCase '}'
 
-  48  $$20 :
+  48  ifStatement : ifStatementWithoutElse
+  49              | ifStatementWithoutElse ELSE statement
 
-  49  scopeForVarDecls : typeVar $$20 attribScopeForVars
-  50                   |
+  50  $$19 :
 
-  51  $$21 :
+  51  ifStatementWithoutElse : IF '(' expression $$19 ')' statement
 
-  52  attribScopeForVars : IDENT ATTRIB expression $$21 extendScopeForVars
+  52  $$20 :
 
-  53  extendScopeForVars : ',' attribScopeForVars
-  54                     |
+  53  scopeForVarDecls : typeVar $$20 attribScopeForVars
+  54                   |
 
-  55  elseifStatement : ELSE statementElements
-  56                  |
+  55  $$21 :
 
-  57  attribWithExpr : IDENT ATTRIB expression
+  56  attribScopeForVars : IDENT ATTRIB expression $$21 extendScopeForVars
 
-  58  statementElements : statement
-  59                    | '{' statementList '}'
+  57  extendScopeForVars : ',' attribScopeForVars
+  58                     |
+
+  59  attribWithExpr : IDENT ATTRIB expression
 
   60  listSwitchCase : CASE validCaseSwitch statementSwitchCase
   61                 | DEFAULT statementSwitchCase
@@ -115,7 +114,7 @@
   65                  | TRUE
   66                  | FALSE
 
-  67  statementSwitchCase : ':' statementElements listSwitchCase
+  67  statementSwitchCase : ':' statement listSwitchCase
 
   68  $$22 :
 
@@ -485,26 +484,9 @@ state 36
 	methodDecl : '(' $$6 argsList ')' '{' . statementList '}' declList  (14)
 	statementList : .  (25)
 
-	IDENT  shift 41
-	INT  shift 4
-	BOOL  shift 5
-	DOUBLE  shift 7
-	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'}'  reduce 25
+	.  reduce 25
 
-	typeVar  goto 50
-	statementList  goto 51
-	statement  goto 52
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
+	statementList  goto 41
 
 
 state 37
@@ -514,7 +496,7 @@ state 37
 	','  shift 32
 	')'  reduce 23
 
-	argsListComma  goto 55
+	argsListComma  goto 42
 
 
 state 38
@@ -523,7 +505,7 @@ state 38
 	IDENT  shift 28
 	.  error
 
-	listNameDecls  goto 56
+	listNameDecls  goto 43
 
 
 state 39
@@ -539,238 +521,296 @@ state 40
 
 
 state 41
-	attribWithExpr : IDENT . ATTRIB expression  (57)
-	typeVar : IDENT .  (106)
-
-	ATTRIB  shift 57
-	IDENT  reduce 106
-
-
-state 42
-	statement : SWITCH . '(' expression ')' '{' listSwitchCase '}'  (47)
-
-	'('  shift 58
-	.  error
-
-
-state 43
-	statement : WHILE . $$11 '(' expression $$12 ')' $$13 statementElements  (36)
-	$$11 : .  (33)
-
-	.  reduce 33
-
-	$$11  goto 59
-
-
-state 44
-	statement : DO . $$14 $$15 statementElements WHILE '(' expression $$16 ')'  (40)
-	$$14 : .  (37)
-
-	.  reduce 37
-
-	$$14  goto 60
-
-
-state 45
-	statement : FOR . '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statementElements  (32)
-
-	'('  shift 61
-	.  error
-
-
-state 46
-	statement : IF . '(' expression $$17 ')' statementElements elseifStatement  (42)
-
-	'('  shift 62
-	.  error
-
-
-state 47
-	statement : RETURN . expression $$8 ';'  (29)
-
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 69
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-
-
-state 48
-	statement : BREAK . $$18 ';'  (44)
-	$$18 : .  (43)
-
-	.  reduce 43
-
-	$$18  goto 72
-
-
-state 49
-	statement : CONTINUE . $$19 ';'  (46)
-	$$19 : .  (45)
-
-	.  reduce 45
-
-	$$19  goto 73
-
-
-state 50
-	scopeFunVarDecls : typeVar . $$22 listScopeFunVar  (69)
-	$$22 : .  (68)
-
-	.  reduce 68
-
-	$$22  goto 74
-
-
-state 51
 	methodDecl : '(' $$6 argsList ')' '{' statementList . '}' declList  (14)
+	statementList : statementList . statement  (24)
 
-	'}'  shift 75
-	.  error
-
-
-state 52
-	statementList : statement . statementList  (24)
-	statementList : .  (25)
-
-	IDENT  shift 41
+	IDENT  shift 44
 	INT  shift 4
 	BOOL  shift 5
 	DOUBLE  shift 7
 	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'}'  reduce 25
-
-	typeVar  goto 50
-	statementList  goto 76
-	statement  goto 52
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-
-
-state 53
-	statement : scopeFunVarDecls . ';'  (26)
-
-	';'  shift 77
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
+	'}'  shift 54
 	.  error
 
+	typeVar  goto 55
+	statement  goto 56
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
 
-state 54
-	statement : attribWithExpr . ';'  (27)
 
-	';'  shift 78
-	.  error
-
-
-state 55
+state 42
 	argsListComma : ',' argRule argsListComma .  (22)
 
 	.  reduce 22
 
 
-state 56
+state 43
 	nameDecls : ',' listNameDecls .  (17)
 
 	.  reduce 17
 
 
-state 57
-	attribWithExpr : IDENT ATTRIB . expression  (57)
+state 44
+	attribWithExpr : IDENT . ATTRIB expression  (59)
+	typeVar : IDENT .  (106)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 79
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	ATTRIB  shift 61
+	IDENT  reduce 106
 
 
-state 58
-	statement : SWITCH '(' . expression ')' '{' listSwitchCase '}'  (47)
+state 45
+	statement : SWITCH . '(' expression ')' '{' listSwitchCase '}'  (47)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 80
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-
-
-state 59
-	statement : WHILE $$11 . '(' expression $$12 ')' $$13 statementElements  (36)
-
-	'('  shift 81
+	'('  shift 62
 	.  error
 
 
-state 60
-	statement : DO $$14 . $$15 statementElements WHILE '(' expression $$16 ')'  (40)
-	$$15 : .  (38)
+state 46
+	statement : WHILE . $$11 '(' expression $$12 ')' $$13 statement  (37)
+	$$11 : .  (34)
+
+	.  reduce 34
+
+	$$11  goto 63
+
+
+state 47
+	statement : DO . $$14 $$15 statement WHILE '(' expression $$16 ')'  (41)
+	$$14 : .  (38)
 
 	.  reduce 38
 
-	$$15  goto 82
+	$$14  goto 64
+
+
+state 48
+	statement : FOR . '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statement  (33)
+
+	'('  shift 65
+	.  error
+
+
+state 49
+	ifStatementWithoutElse : IF . '(' expression $$19 ')' statement  (51)
+
+	'('  shift 66
+	.  error
+
+
+state 50
+	statement : RETURN . expression $$8 ';'  (30)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 73
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+
+
+state 51
+	statement : BREAK . $$17 ';'  (44)
+	$$17 : .  (43)
+
+	.  reduce 43
+
+	$$17  goto 76
+
+
+state 52
+	statement : CONTINUE . $$18 ';'  (46)
+	$$18 : .  (45)
+
+	.  reduce 45
+
+	$$18  goto 77
+
+
+state 53
+	statement : '{' . statementList '}'  (26)
+	statementList : .  (25)
+
+	.  reduce 25
+
+	statementList  goto 78
+
+
+state 54
+	methodDecl : '(' $$6 argsList ')' '{' statementList '}' . declList  (14)
+	declList : .  (7)
+
+	IDENT  shift 3
+	INT  shift 4
+	BOOL  shift 5
+	VOID  shift 6
+	DOUBLE  shift 7
+	STRING  shift 8
+	$end  reduce 7
+
+	typeVar  goto 9
+	declList  goto 79
+
+
+state 55
+	scopeFunVarDecls : typeVar . $$22 listScopeFunVar  (69)
+	$$22 : .  (68)
+
+	.  reduce 68
+
+	$$22  goto 80
+
+
+state 56
+	statementList : statementList statement .  (24)
+
+	.  reduce 24
+
+
+state 57
+	statement : scopeFunVarDecls . ';'  (27)
+
+	';'  shift 81
+	.  error
+
+
+state 58
+	statement : attribWithExpr . ';'  (28)
+
+	';'  shift 82
+	.  error
+
+
+state 59
+	statement : ifStatement .  (42)
+
+	.  reduce 42
+
+
+60: shift/reduce conflict (shift 83, reduce 48) on ELSE
+state 60
+	ifStatement : ifStatementWithoutElse .  (48)
+	ifStatement : ifStatementWithoutElse . ELSE statement  (49)
+
+	ELSE  shift 83
+	IDENT  reduce 48
+	INT  reduce 48
+	BOOL  reduce 48
+	DOUBLE  reduce 48
+	STRING  reduce 48
+	SWITCH  reduce 48
+	CASE  reduce 48
+	DEFAULT  reduce 48
+	WHILE  reduce 48
+	DO  reduce 48
+	FOR  reduce 48
+	IF  reduce 48
+	RETURN  reduce 48
+	BREAK  reduce 48
+	CONTINUE  reduce 48
+	'{'  reduce 48
+	'}'  reduce 48
 
 
 state 61
-	statement : FOR '(' . $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statementElements  (32)
-	$$9 : .  (30)
+	attribWithExpr : IDENT ATTRIB . expression  (59)
 
-	.  reduce 30
-
-	$$9  goto 83
-
-
-state 62
-	statement : IF '(' . expression $$17 ')' statementElements elseifStatement  (42)
-
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
 	expression  goto 84
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+
+
+state 62
+	statement : SWITCH '(' . expression ')' '{' listSwitchCase '}'  (47)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 85
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 63
+	statement : WHILE $$11 . '(' expression $$12 ')' $$13 statement  (37)
+
+	'('  shift 86
+	.  error
+
+
+state 64
+	statement : DO $$14 . $$15 statement WHILE '(' expression $$16 ')'  (41)
+	$$15 : .  (39)
+
+	.  reduce 39
+
+	$$15  goto 87
+
+
+state 65
+	statement : FOR '(' . $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statement  (33)
+	$$9 : .  (31)
+
+	.  reduce 31
+
+	$$9  goto 88
+
+
+state 66
+	ifStatementWithoutElse : IF '(' . expression $$19 ')' statement  (51)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 89
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+
+
+state 67
 	validCaseSwitch : NUM .  (64)
 
 	.  reduce 64
 
 
-state 64
+state 68
 	validCaseSwitch : IDENT .  (63)
 	expressionWithFun : IDENT . '(' argsSourceList ')'  (81)
 
-	'('  shift 85
+	'('  shift 90
 	AND  reduce 63
 	OR  reduce 63
 	DIV  reduce 63
@@ -789,52 +829,52 @@ state 64
 	')'  reduce 63
 
 
-state 65
+state 69
 	validCaseSwitch : TRUE .  (65)
 
 	.  reduce 65
 
 
-state 66
+state 70
 	validCaseSwitch : FALSE .  (66)
 
 	.  reduce 66
 
 
-state 67
+state 71
 	expression : NOT . expression  (98)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 86
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 91
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
-state 68
+state 72
 	expression : '(' . expression ')'  (99)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 87
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 92
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
-state 69
-	statement : RETURN expression . $$8 ';'  (29)
+state 73
+	statement : RETURN expression . $$8 ';'  (30)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -848,98 +888,138 @@ state 69
 	expression : expression . GEQ expression  (95)
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
-	$$8 : .  (28)
+	$$8 : .  (29)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	';'  reduce 28
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	';'  reduce 29
 
-	$$8  goto 101
+	$$8  goto 106
 
 
-state 70
+state 74
 	expression : validCaseSwitch .  (101)
 
 	.  reduce 101
 
 
-state 71
+state 75
 	expression : expressionWithFun .  (100)
 
 	.  reduce 100
 
 
-state 72
-	statement : BREAK $$18 . ';'  (44)
-
-	';'  shift 102
-	.  error
-
-
-state 73
-	statement : CONTINUE $$19 . ';'  (46)
-
-	';'  shift 103
-	.  error
-
-
-state 74
-	scopeFunVarDecls : typeVar $$22 . listScopeFunVar  (69)
-
-	IDENT  shift 104
-	.  error
-
-	attribWithExpr  goto 105
-	listScopeFunVar  goto 106
-
-
-state 75
-	methodDecl : '(' $$6 argsList ')' '{' statementList '}' . declList  (14)
-	declList : .  (7)
-
-	IDENT  shift 3
-	INT  shift 4
-	BOOL  shift 5
-	VOID  shift 6
-	DOUBLE  shift 7
-	STRING  shift 8
-	$end  reduce 7
-
-	typeVar  goto 9
-	declList  goto 107
-
-
 state 76
-	statementList : statement statementList .  (24)
+	statement : BREAK $$17 . ';'  (44)
 
-	.  reduce 24
+	';'  shift 107
+	.  error
 
 
 state 77
-	statement : scopeFunVarDecls ';' .  (26)
+	statement : CONTINUE $$18 . ';'  (46)
 
-	.  reduce 26
+	';'  shift 108
+	.  error
 
 
 state 78
-	statement : attribWithExpr ';' .  (27)
+	statementList : statementList . statement  (24)
+	statement : '{' statementList . '}'  (26)
+
+	IDENT  shift 44
+	INT  shift 4
+	BOOL  shift 5
+	DOUBLE  shift 7
+	STRING  shift 8
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
+	'}'  shift 109
+	.  error
+
+	typeVar  goto 55
+	statement  goto 56
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
+
+
+state 79
+	methodDecl : '(' $$6 argsList ')' '{' statementList '}' declList .  (14)
+
+	.  reduce 14
+
+
+state 80
+	scopeFunVarDecls : typeVar $$22 . listScopeFunVar  (69)
+
+	IDENT  shift 110
+	.  error
+
+	attribWithExpr  goto 111
+	listScopeFunVar  goto 112
+
+
+state 81
+	statement : scopeFunVarDecls ';' .  (27)
 
 	.  reduce 27
 
 
-state 79
-	attribWithExpr : IDENT ATTRIB expression .  (57)
+state 82
+	statement : attribWithExpr ';' .  (28)
+
+	.  reduce 28
+
+
+state 83
+	ifStatement : ifStatementWithoutElse ELSE . statement  (49)
+
+	IDENT  shift 44
+	INT  shift 4
+	BOOL  shift 5
+	DOUBLE  shift 7
+	STRING  shift 8
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
+	.  error
+
+	typeVar  goto 55
+	statement  goto 113
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
+
+
+state 84
+	attribWithExpr : IDENT ATTRIB expression .  (59)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -954,24 +1034,24 @@ state 79
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	';'  reduce 57
-	','  reduce 57
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	';'  reduce 59
+	','  reduce 59
 
 
-state 80
+state 85
 	statement : SWITCH '(' expression . ')' '{' listSwitchCase '}'  (47)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
@@ -987,82 +1067,83 @@ state 80
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	')'  shift 108
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	')'  shift 114
 	.  error
 
 
-state 81
-	statement : WHILE $$11 '(' . expression $$12 ')' $$13 statementElements  (36)
+state 86
+	statement : WHILE $$11 '(' . expression $$12 ')' $$13 statement  (37)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 109
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 115
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
-state 82
-	statement : DO $$14 $$15 . statementElements WHILE '(' expression $$16 ')'  (40)
+state 87
+	statement : DO $$14 $$15 . statement WHILE '(' expression $$16 ')'  (41)
 
-	IDENT  shift 41
+	IDENT  shift 44
 	INT  shift 4
 	BOOL  shift 5
 	DOUBLE  shift 7
 	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'{'  shift 110
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
 	.  error
 
-	typeVar  goto 50
-	statement  goto 111
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-	statementElements  goto 112
+	typeVar  goto 55
+	statement  goto 116
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
 
 
-state 83
-	statement : FOR '(' $$9 . scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statementElements  (32)
-	scopeForVarDecls : .  (50)
+state 88
+	statement : FOR '(' $$9 . scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statement  (33)
+	scopeForVarDecls : .  (54)
 
 	IDENT  shift 3
 	INT  shift 4
 	BOOL  shift 5
 	DOUBLE  shift 7
 	STRING  shift 8
-	';'  reduce 50
+	';'  reduce 54
 
-	typeVar  goto 113
-	scopeForVarDecls  goto 114
+	typeVar  goto 117
+	scopeForVarDecls  goto 118
 
 
-state 84
-	statement : IF '(' expression . $$17 ')' statementElements elseifStatement  (42)
+state 89
+	ifStatementWithoutElse : IF '(' expression . $$19 ')' statement  (51)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1076,44 +1157,44 @@ state 84
 	expression : expression . GEQ expression  (95)
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
-	$$17 : .  (41)
+	$$19 : .  (50)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	')'  reduce 41
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	')'  reduce 50
 
-	$$17  goto 115
+	$$19  goto 119
 
 
-state 85
+state 90
 	expressionWithFun : IDENT '(' . argsSourceList ')'  (81)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 116
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-	argsSourceList  goto 117
+	expression  goto 120
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+	argsSourceList  goto 121
 
 
-state 86
+state 91
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1129,25 +1210,25 @@ state 86
 	expression : expression . NEQ expression  (97)
 	expression : NOT expression .  (98)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
 	';'  reduce 98
 	','  reduce 98
 	')'  reduce 98
 
 
-state 87
+state 92
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1163,288 +1244,294 @@ state 87
 	expression : expression . NEQ expression  (97)
 	expression : '(' expression . ')'  (99)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	')'  shift 118
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	')'  shift 122
 	.  error
-
-
-state 88
-	expression : expression AND . expression  (91)
-
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 119
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-
-
-state 89
-	expression : expression OR . expression  (90)
-
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 120
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-
-
-state 90
-	expression : expression DIV . expression  (88)
-
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 121
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-
-
-state 91
-	expression : expression MOD . expression  (89)
-
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 122
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-
-
-state 92
-	expression : expression EQ . expression  (94)
-
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	.  error
-
-	expression  goto 123
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
 
 
 state 93
-	expression : expression NEQ . expression  (97)
+	expression : expression AND . expression  (91)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 124
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 123
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 94
-	expression : expression LEQ . expression  (93)
+	expression : expression OR . expression  (90)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 125
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 124
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 95
-	expression : expression GEQ . expression  (95)
+	expression : expression DIV . expression  (88)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 126
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 125
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 96
-	expression : expression '<' . expression  (92)
+	expression : expression MOD . expression  (89)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 127
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 126
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 97
-	expression : expression '>' . expression  (96)
+	expression : expression EQ . expression  (94)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 128
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 127
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 98
-	expression : expression '*' . expression  (87)
+	expression : expression NEQ . expression  (97)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 129
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 128
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 99
-	expression : expression '+' . expression  (85)
+	expression : expression LEQ . expression  (93)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 130
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 129
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 100
-	expression : expression '-' . expression  (86)
+	expression : expression GEQ . expression  (95)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 131
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	expression  goto 130
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 101
-	statement : RETURN expression $$8 . ';'  (29)
+	expression : expression '<' . expression  (92)
 
-	';'  shift 132
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
+
+	expression  goto 131
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 102
-	statement : BREAK $$18 ';' .  (44)
+	expression : expression '>' . expression  (96)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 132
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+
+
+state 103
+	expression : expression '*' . expression  (87)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 133
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+
+
+state 104
+	expression : expression '+' . expression  (85)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 134
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+
+
+state 105
+	expression : expression '-' . expression  (86)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 135
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+
+
+state 106
+	statement : RETURN expression $$8 . ';'  (30)
+
+	';'  shift 136
+	.  error
+
+
+state 107
+	statement : BREAK $$17 ';' .  (44)
 
 	.  reduce 44
 
 
-state 103
-	statement : CONTINUE $$19 ';' .  (46)
+state 108
+	statement : CONTINUE $$18 ';' .  (46)
 
 	.  reduce 46
 
 
-state 104
-	attribWithExpr : IDENT . ATTRIB expression  (57)
+state 109
+	statement : '{' statementList '}' .  (26)
 
-	ATTRIB  shift 57
+	.  reduce 26
+
+
+state 110
+	attribWithExpr : IDENT . ATTRIB expression  (59)
+
+	ATTRIB  shift 61
 	.  error
 
 
-state 105
+state 111
 	listScopeFunVar : attribWithExpr . extendListScopeFunVar  (70)
 	extendListScopeFunVar : .  (72)
 
-	','  shift 133
+	','  shift 137
 	';'  reduce 72
 
-	extendListScopeFunVar  goto 134
+	extendListScopeFunVar  goto 138
 
 
-state 106
+state 112
 	scopeFunVarDecls : typeVar $$22 listScopeFunVar .  (69)
 
 	.  reduce 69
 
 
-state 107
-	methodDecl : '(' $$6 argsList ')' '{' statementList '}' declList .  (14)
+state 113
+	ifStatement : ifStatementWithoutElse ELSE statement .  (49)
 
-	.  reduce 14
+	.  reduce 49
 
 
-state 108
+state 114
 	statement : SWITCH '(' expression ')' . '{' listSwitchCase '}'  (47)
 
-	'{'  shift 135
+	'{'  shift 139
 	.  error
 
 
-state 109
-	statement : WHILE $$11 '(' expression . $$12 ')' $$13 statementElements  (36)
+state 115
+	statement : WHILE $$11 '(' expression . $$12 ')' $$13 statement  (37)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1458,89 +1545,57 @@ state 109
 	expression : expression . GEQ expression  (95)
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
-	$$12 : .  (34)
+	$$12 : .  (35)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	')'  reduce 34
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	')'  reduce 35
 
-	$$12  goto 136
-
-
-state 110
-	statementElements : '{' . statementList '}'  (59)
-	statementList : .  (25)
-
-	IDENT  shift 41
-	INT  shift 4
-	BOOL  shift 5
-	DOUBLE  shift 7
-	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'}'  reduce 25
-
-	typeVar  goto 50
-	statementList  goto 137
-	statement  goto 52
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-
-
-state 111
-	statementElements : statement .  (58)
-
-	.  reduce 58
-
-
-state 112
-	statement : DO $$14 $$15 statementElements . WHILE '(' expression $$16 ')'  (40)
-
-	WHILE  shift 138
-	.  error
-
-
-state 113
-	scopeForVarDecls : typeVar . $$20 attribScopeForVars  (49)
-	$$20 : .  (48)
-
-	.  reduce 48
-
-	$$20  goto 139
-
-
-state 114
-	statement : FOR '(' $$9 scopeForVarDecls . ';' expressionForDecls ';' counterForDecls ')' $$10 statementElements  (32)
-
-	';'  shift 140
-	.  error
-
-
-state 115
-	statement : IF '(' expression $$17 . ')' statementElements elseifStatement  (42)
-
-	')'  shift 141
-	.  error
+	$$12  goto 140
 
 
 state 116
+	statement : DO $$14 $$15 statement . WHILE '(' expression $$16 ')'  (41)
+
+	WHILE  shift 141
+	.  error
+
+
+state 117
+	scopeForVarDecls : typeVar . $$20 attribScopeForVars  (53)
+	$$20 : .  (52)
+
+	.  reduce 52
+
+	$$20  goto 142
+
+
+state 118
+	statement : FOR '(' $$9 scopeForVarDecls . ';' expressionForDecls ';' counterForDecls ')' $$10 statement  (33)
+
+	';'  shift 143
+	.  error
+
+
+state 119
+	ifStatementWithoutElse : IF '(' expression $$19 . ')' statement  (51)
+
+	')'  shift 144
+	.  error
+
+
+state 120
 	argsSourceList : expression . expressionList  (82)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
@@ -1557,39 +1612,39 @@ state 116
 	expression : expression . NEQ expression  (97)
 	expressionList : .  (84)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	','  shift 142
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	','  shift 145
 	')'  reduce 84
 
-	expressionList  goto 143
+	expressionList  goto 146
 
 
-state 117
+state 121
 	expressionWithFun : IDENT '(' argsSourceList . ')'  (81)
 
-	')'  shift 144
+	')'  shift 147
 	.  error
 
 
-state 118
+state 122
 	expression : '(' expression ')' .  (99)
 
 	.  reduce 99
 
 
-state 119
+state 123
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1608,7 +1663,7 @@ state 119
 	.  reduce 91
 
 
-state 120
+state 124
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1627,7 +1682,7 @@ state 120
 	.  reduce 90
 
 
-state 121
+state 125
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1643,10 +1698,10 @@ state 121
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	'+'  shift 99
-	'-'  shift 100
+	AND  shift 93
+	OR  shift 94
+	'+'  shift 104
+	'-'  shift 105
 	DIV  reduce 88
 	MOD  reduce 88
 	EQ  reduce 88
@@ -1661,7 +1716,7 @@ state 121
 	')'  reduce 88
 
 
-state 122
+state 126
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1677,10 +1732,10 @@ state 122
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	'+'  shift 99
-	'-'  shift 100
+	AND  shift 93
+	OR  shift 94
+	'+'  shift 104
+	'-'  shift 105
 	DIV  reduce 89
 	MOD  reduce 89
 	EQ  reduce 89
@@ -1695,7 +1750,7 @@ state 122
 	')'  reduce 89
 
 
-state 123
+state 127
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1711,128 +1766,16 @@ state 123
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
 	';'  reduce 94
 	','  reduce 94
 	')'  reduce 94
-
-
-state 124
-	expression : expression . '+' expression  (85)
-	expression : expression . '-' expression  (86)
-	expression : expression . '*' expression  (87)
-	expression : expression . DIV expression  (88)
-	expression : expression . MOD expression  (89)
-	expression : expression . OR expression  (90)
-	expression : expression . AND expression  (91)
-	expression : expression . '<' expression  (92)
-	expression : expression . LEQ expression  (93)
-	expression : expression . EQ expression  (94)
-	expression : expression . GEQ expression  (95)
-	expression : expression . '>' expression  (96)
-	expression : expression . NEQ expression  (97)
-	expression : expression NEQ expression .  (97)
-
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	';'  reduce 97
-	','  reduce 97
-	')'  reduce 97
-
-
-state 125
-	expression : expression . '+' expression  (85)
-	expression : expression . '-' expression  (86)
-	expression : expression . '*' expression  (87)
-	expression : expression . DIV expression  (88)
-	expression : expression . MOD expression  (89)
-	expression : expression . OR expression  (90)
-	expression : expression . AND expression  (91)
-	expression : expression . '<' expression  (92)
-	expression : expression . LEQ expression  (93)
-	expression : expression LEQ expression .  (93)
-	expression : expression . EQ expression  (94)
-	expression : expression . GEQ expression  (95)
-	expression : expression . '>' expression  (96)
-	expression : expression . NEQ expression  (97)
-
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	';'  reduce 93
-	','  reduce 93
-	')'  reduce 93
-
-
-state 126
-	expression : expression . '+' expression  (85)
-	expression : expression . '-' expression  (86)
-	expression : expression . '*' expression  (87)
-	expression : expression . DIV expression  (88)
-	expression : expression . MOD expression  (89)
-	expression : expression . OR expression  (90)
-	expression : expression . AND expression  (91)
-	expression : expression . '<' expression  (92)
-	expression : expression . LEQ expression  (93)
-	expression : expression . EQ expression  (94)
-	expression : expression . GEQ expression  (95)
-	expression : expression GEQ expression .  (95)
-	expression : expression . '>' expression  (96)
-	expression : expression . NEQ expression  (97)
-
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	';'  reduce 95
-	','  reduce 95
-	')'  reduce 95
-
-
-state 127
-	expression : expression . '+' expression  (85)
-	expression : expression . '-' expression  (86)
-	expression : expression . '*' expression  (87)
-	expression : expression . DIV expression  (88)
-	expression : expression . MOD expression  (89)
-	expression : expression . OR expression  (90)
-	expression : expression . AND expression  (91)
-	expression : expression . '<' expression  (92)
-	expression : expression '<' expression .  (92)
-	expression : expression . LEQ expression  (93)
-	expression : expression . EQ expression  (94)
-	expression : expression . GEQ expression  (95)
-	expression : expression . '>' expression  (96)
-	expression : expression . NEQ expression  (97)
-
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	';'  reduce 92
-	','  reduce 92
-	')'  reduce 92
 
 
 state 128
@@ -1848,22 +1791,134 @@ state 128
 	expression : expression . EQ expression  (94)
 	expression : expression . GEQ expression  (95)
 	expression : expression . '>' expression  (96)
+	expression : expression . NEQ expression  (97)
+	expression : expression NEQ expression .  (97)
+
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	';'  reduce 97
+	','  reduce 97
+	')'  reduce 97
+
+
+state 129
+	expression : expression . '+' expression  (85)
+	expression : expression . '-' expression  (86)
+	expression : expression . '*' expression  (87)
+	expression : expression . DIV expression  (88)
+	expression : expression . MOD expression  (89)
+	expression : expression . OR expression  (90)
+	expression : expression . AND expression  (91)
+	expression : expression . '<' expression  (92)
+	expression : expression . LEQ expression  (93)
+	expression : expression LEQ expression .  (93)
+	expression : expression . EQ expression  (94)
+	expression : expression . GEQ expression  (95)
+	expression : expression . '>' expression  (96)
+	expression : expression . NEQ expression  (97)
+
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	';'  reduce 93
+	','  reduce 93
+	')'  reduce 93
+
+
+state 130
+	expression : expression . '+' expression  (85)
+	expression : expression . '-' expression  (86)
+	expression : expression . '*' expression  (87)
+	expression : expression . DIV expression  (88)
+	expression : expression . MOD expression  (89)
+	expression : expression . OR expression  (90)
+	expression : expression . AND expression  (91)
+	expression : expression . '<' expression  (92)
+	expression : expression . LEQ expression  (93)
+	expression : expression . EQ expression  (94)
+	expression : expression . GEQ expression  (95)
+	expression : expression GEQ expression .  (95)
+	expression : expression . '>' expression  (96)
+	expression : expression . NEQ expression  (97)
+
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	';'  reduce 95
+	','  reduce 95
+	')'  reduce 95
+
+
+state 131
+	expression : expression . '+' expression  (85)
+	expression : expression . '-' expression  (86)
+	expression : expression . '*' expression  (87)
+	expression : expression . DIV expression  (88)
+	expression : expression . MOD expression  (89)
+	expression : expression . OR expression  (90)
+	expression : expression . AND expression  (91)
+	expression : expression . '<' expression  (92)
+	expression : expression '<' expression .  (92)
+	expression : expression . LEQ expression  (93)
+	expression : expression . EQ expression  (94)
+	expression : expression . GEQ expression  (95)
+	expression : expression . '>' expression  (96)
+	expression : expression . NEQ expression  (97)
+
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	';'  reduce 92
+	','  reduce 92
+	')'  reduce 92
+
+
+state 132
+	expression : expression . '+' expression  (85)
+	expression : expression . '-' expression  (86)
+	expression : expression . '*' expression  (87)
+	expression : expression . DIV expression  (88)
+	expression : expression . MOD expression  (89)
+	expression : expression . OR expression  (90)
+	expression : expression . AND expression  (91)
+	expression : expression . '<' expression  (92)
+	expression : expression . LEQ expression  (93)
+	expression : expression . EQ expression  (94)
+	expression : expression . GEQ expression  (95)
+	expression : expression . '>' expression  (96)
 	expression : expression '>' expression .  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
 	';'  reduce 96
 	','  reduce 96
 	')'  reduce 96
 
 
-state 129
+state 133
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -1879,10 +1934,10 @@ state 129
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	'+'  shift 99
-	'-'  shift 100
+	AND  shift 93
+	OR  shift 94
+	'+'  shift 104
+	'-'  shift 105
 	DIV  reduce 87
 	MOD  reduce 87
 	EQ  reduce 87
@@ -1897,7 +1952,7 @@ state 129
 	')'  reduce 87
 
 
-state 130
+state 134
 	expression : expression . '+' expression  (85)
 	expression : expression '+' expression .  (85)
 	expression : expression . '-' expression  (86)
@@ -1913,8 +1968,8 @@ state 130
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
+	AND  shift 93
+	OR  shift 94
 	DIV  reduce 85
 	MOD  reduce 85
 	EQ  reduce 85
@@ -1931,7 +1986,7 @@ state 130
 	')'  reduce 85
 
 
-state 131
+state 135
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression '-' expression .  (86)
@@ -1947,8 +2002,8 @@ state 131
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
+	AND  shift 93
+	OR  shift 94
 	DIV  reduce 86
 	MOD  reduce 86
 	EQ  reduce 86
@@ -1965,221 +2020,209 @@ state 131
 	')'  reduce 86
 
 
-state 132
-	statement : RETURN expression $$8 ';' .  (29)
+state 136
+	statement : RETURN expression $$8 ';' .  (30)
 
-	.  reduce 29
+	.  reduce 30
 
 
-state 133
+state 137
 	extendListScopeFunVar : ',' . listScopeFunVar  (71)
 
-	IDENT  shift 104
+	IDENT  shift 110
 	.  error
 
-	attribWithExpr  goto 105
-	listScopeFunVar  goto 145
+	attribWithExpr  goto 111
+	listScopeFunVar  goto 148
 
 
-state 134
+state 138
 	listScopeFunVar : attribWithExpr extendListScopeFunVar .  (70)
 
 	.  reduce 70
 
 
-state 135
+state 139
 	statement : SWITCH '(' expression ')' '{' . listSwitchCase '}'  (47)
 	listSwitchCase : .  (62)
 
-	CASE  shift 146
-	DEFAULT  shift 147
+	CASE  shift 149
+	DEFAULT  shift 150
 	'}'  reduce 62
 
-	listSwitchCase  goto 148
-
-
-state 136
-	statement : WHILE $$11 '(' expression $$12 . ')' $$13 statementElements  (36)
-
-	')'  shift 149
-	.  error
-
-
-state 137
-	statementElements : '{' statementList . '}'  (59)
-
-	'}'  shift 150
-	.  error
-
-
-state 138
-	statement : DO $$14 $$15 statementElements WHILE . '(' expression $$16 ')'  (40)
-
-	'('  shift 151
-	.  error
-
-
-state 139
-	scopeForVarDecls : typeVar $$20 . attribScopeForVars  (49)
-
-	IDENT  shift 152
-	.  error
-
-	attribScopeForVars  goto 153
+	listSwitchCase  goto 151
 
 
 state 140
-	statement : FOR '(' $$9 scopeForVarDecls ';' . expressionForDecls ';' counterForDecls ')' $$10 statementElements  (32)
-	expressionForDecls : .  (74)
+	statement : WHILE $$11 '(' expression $$12 . ')' $$13 statement  (37)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
-	';'  reduce 74
-
-	expression  goto 154
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-	expressionForDecls  goto 155
+	')'  shift 152
+	.  error
 
 
 state 141
-	statement : IF '(' expression $$17 ')' . statementElements elseifStatement  (42)
+	statement : DO $$14 $$15 statement WHILE . '(' expression $$16 ')'  (41)
 
-	IDENT  shift 41
+	'('  shift 153
+	.  error
+
+
+state 142
+	scopeForVarDecls : typeVar $$20 . attribScopeForVars  (53)
+
+	IDENT  shift 154
+	.  error
+
+	attribScopeForVars  goto 155
+
+
+state 143
+	statement : FOR '(' $$9 scopeForVarDecls ';' . expressionForDecls ';' counterForDecls ')' $$10 statement  (33)
+	expressionForDecls : .  (74)
+
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	';'  reduce 74
+
+	expression  goto 156
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+	expressionForDecls  goto 157
+
+
+state 144
+	ifStatementWithoutElse : IF '(' expression $$19 ')' . statement  (51)
+
+	IDENT  shift 44
 	INT  shift 4
 	BOOL  shift 5
 	DOUBLE  shift 7
 	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'{'  shift 110
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
 	.  error
 
-	typeVar  goto 50
-	statement  goto 111
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-	statementElements  goto 156
+	typeVar  goto 55
+	statement  goto 158
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
 
 
-state 142
+state 145
 	expressionList : ',' . argsSourceList  (83)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
-	expression  goto 116
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
-	argsSourceList  goto 157
+	expression  goto 120
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
+	argsSourceList  goto 159
 
 
-state 143
+state 146
 	argsSourceList : expression expressionList .  (82)
 
 	.  reduce 82
 
 
-state 144
+state 147
 	expressionWithFun : IDENT '(' argsSourceList ')' .  (81)
 
 	.  reduce 81
 
 
-state 145
+state 148
 	extendListScopeFunVar : ',' listScopeFunVar .  (71)
 
 	.  reduce 71
 
 
-state 146
+state 149
 	listSwitchCase : CASE . validCaseSwitch statementSwitchCase  (60)
 
-	NUM  shift 63
-	IDENT  shift 158
-	TRUE  shift 65
-	FALSE  shift 66
+	NUM  shift 67
+	IDENT  shift 160
+	TRUE  shift 69
+	FALSE  shift 70
 	.  error
 
-	validCaseSwitch  goto 159
-
-
-state 147
-	listSwitchCase : DEFAULT . statementSwitchCase  (61)
-
-	':'  shift 160
-	.  error
-
-	statementSwitchCase  goto 161
-
-
-state 148
-	statement : SWITCH '(' expression ')' '{' listSwitchCase . '}'  (47)
-
-	'}'  shift 162
-	.  error
-
-
-state 149
-	statement : WHILE $$11 '(' expression $$12 ')' . $$13 statementElements  (36)
-	$$13 : .  (35)
-
-	.  reduce 35
-
-	$$13  goto 163
+	validCaseSwitch  goto 161
 
 
 state 150
-	statementElements : '{' statementList '}' .  (59)
+	listSwitchCase : DEFAULT . statementSwitchCase  (61)
 
-	.  reduce 59
+	':'  shift 162
+	.  error
+
+	statementSwitchCase  goto 163
 
 
 state 151
-	statement : DO $$14 $$15 statementElements WHILE '(' . expression $$16 ')'  (40)
+	statement : SWITCH '(' expression ')' '{' listSwitchCase . '}'  (47)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	'}'  shift 164
 	.  error
-
-	expression  goto 164
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
 
 
 state 152
-	attribScopeForVars : IDENT . ATTRIB expression $$21 extendScopeForVars  (52)
+	statement : WHILE $$11 '(' expression $$12 ')' . $$13 statement  (37)
+	$$13 : .  (36)
 
-	ATTRIB  shift 165
-	.  error
+	.  reduce 36
+
+	$$13  goto 165
 
 
 state 153
-	scopeForVarDecls : typeVar $$20 attribScopeForVars .  (49)
+	statement : DO $$14 $$15 statement WHILE '(' . expression $$16 ')'  (41)
 
-	.  reduce 49
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
+	.  error
+
+	expression  goto 166
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
 state 154
+	attribScopeForVars : IDENT . ATTRIB expression $$21 extendScopeForVars  (56)
+
+	ATTRIB  shift 167
+	.  error
+
+
+state 155
+	scopeForVarDecls : typeVar $$20 attribScopeForVars .  (53)
+
+	.  reduce 53
+
+
+state 156
 	expressionForDecls : expression .  (73)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
@@ -2195,142 +2238,124 @@ state 154
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
 	';'  reduce 73
 
 
-state 155
-	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls . ';' counterForDecls ')' $$10 statementElements  (32)
+state 157
+	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls . ';' counterForDecls ')' $$10 statement  (33)
 
-	';'  shift 166
+	';'  shift 168
 	.  error
 
 
-156: shift/reduce conflict (shift 167, reduce 56) on ELSE
-state 156
-	statement : IF '(' expression $$17 ')' statementElements . elseifStatement  (42)
-	elseifStatement : .  (56)
+state 158
+	ifStatementWithoutElse : IF '(' expression $$19 ')' statement .  (51)
 
-	ELSE  shift 167
-	IDENT  reduce 56
-	INT  reduce 56
-	BOOL  reduce 56
-	DOUBLE  reduce 56
-	STRING  reduce 56
-	SWITCH  reduce 56
-	CASE  reduce 56
-	DEFAULT  reduce 56
-	WHILE  reduce 56
-	DO  reduce 56
-	FOR  reduce 56
-	IF  reduce 56
-	RETURN  reduce 56
-	BREAK  reduce 56
-	CONTINUE  reduce 56
-	'}'  reduce 56
-
-	elseifStatement  goto 168
+	.  reduce 51
 
 
-state 157
+state 159
 	expressionList : ',' argsSourceList .  (83)
 
 	.  reduce 83
 
 
-state 158
+state 160
 	validCaseSwitch : IDENT .  (63)
 
 	.  reduce 63
 
 
-state 159
+state 161
 	listSwitchCase : CASE validCaseSwitch . statementSwitchCase  (60)
 
-	':'  shift 160
+	':'  shift 162
 	.  error
 
 	statementSwitchCase  goto 169
 
 
-state 160
-	statementSwitchCase : ':' . statementElements listSwitchCase  (67)
+state 162
+	statementSwitchCase : ':' . statement listSwitchCase  (67)
 
-	IDENT  shift 41
+	IDENT  shift 44
 	INT  shift 4
 	BOOL  shift 5
 	DOUBLE  shift 7
 	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'{'  shift 110
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
 	.  error
 
-	typeVar  goto 50
-	statement  goto 111
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-	statementElements  goto 170
+	typeVar  goto 55
+	statement  goto 170
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
 
 
-state 161
+state 163
 	listSwitchCase : DEFAULT statementSwitchCase .  (61)
 
 	.  reduce 61
 
 
-state 162
+state 164
 	statement : SWITCH '(' expression ')' '{' listSwitchCase '}' .  (47)
 
 	.  reduce 47
 
 
-state 163
-	statement : WHILE $$11 '(' expression $$12 ')' $$13 . statementElements  (36)
+state 165
+	statement : WHILE $$11 '(' expression $$12 ')' $$13 . statement  (37)
 
-	IDENT  shift 41
+	IDENT  shift 44
 	INT  shift 4
 	BOOL  shift 5
 	DOUBLE  shift 7
 	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'{'  shift 110
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
 	.  error
 
-	typeVar  goto 50
-	statement  goto 111
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-	statementElements  goto 171
+	typeVar  goto 55
+	statement  goto 171
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
 
 
-state 164
-	statement : DO $$14 $$15 statementElements WHILE '(' expression . $$16 ')'  (40)
+state 166
+	statement : DO $$14 $$15 statement WHILE '(' expression . $$16 ')'  (41)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -2344,82 +2369,50 @@ state 164
 	expression : expression . GEQ expression  (95)
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
-	$$16 : .  (39)
+	$$16 : .  (40)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	')'  reduce 39
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	')'  reduce 40
 
 	$$16  goto 172
 
 
-state 165
-	attribScopeForVars : IDENT ATTRIB . expression $$21 extendScopeForVars  (52)
+state 167
+	attribScopeForVars : IDENT ATTRIB . expression $$21 extendScopeForVars  (56)
 
-	NUM  shift 63
-	IDENT  shift 64
-	TRUE  shift 65
-	FALSE  shift 66
-	NOT  shift 67
-	'('  shift 68
+	NUM  shift 67
+	IDENT  shift 68
+	TRUE  shift 69
+	FALSE  shift 70
+	NOT  shift 71
+	'('  shift 72
 	.  error
 
 	expression  goto 173
-	validCaseSwitch  goto 70
-	expressionWithFun  goto 71
+	validCaseSwitch  goto 74
+	expressionWithFun  goto 75
 
 
-state 166
-	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' . counterForDecls ')' $$10 statementElements  (32)
+state 168
+	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' . counterForDecls ')' $$10 statement  (33)
 	counterForDecls : .  (76)
 
 	IDENT  shift 174
 	')'  reduce 76
 
 	counterForDecls  goto 175
-
-
-state 167
-	elseifStatement : ELSE . statementElements  (55)
-
-	IDENT  shift 41
-	INT  shift 4
-	BOOL  shift 5
-	DOUBLE  shift 7
-	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'{'  shift 110
-	.  error
-
-	typeVar  goto 50
-	statement  goto 111
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-	statementElements  goto 176
-
-
-state 168
-	statement : IF '(' expression $$17 ')' statementElements elseifStatement .  (42)
-
-	.  reduce 42
 
 
 state 169
@@ -2429,31 +2422,31 @@ state 169
 
 
 state 170
-	statementSwitchCase : ':' statementElements . listSwitchCase  (67)
+	statementSwitchCase : ':' statement . listSwitchCase  (67)
 	listSwitchCase : .  (62)
 
-	CASE  shift 146
-	DEFAULT  shift 147
+	CASE  shift 149
+	DEFAULT  shift 150
 	'}'  reduce 62
 
-	listSwitchCase  goto 177
+	listSwitchCase  goto 176
 
 
 state 171
-	statement : WHILE $$11 '(' expression $$12 ')' $$13 statementElements .  (36)
+	statement : WHILE $$11 '(' expression $$12 ')' $$13 statement .  (37)
 
-	.  reduce 36
+	.  reduce 37
 
 
 state 172
-	statement : DO $$14 $$15 statementElements WHILE '(' expression $$16 . ')'  (40)
+	statement : DO $$14 $$15 statement WHILE '(' expression $$16 . ')'  (41)
 
-	')'  shift 178
+	')'  shift 177
 	.  error
 
 
 state 173
-	attribScopeForVars : IDENT ATTRIB expression . $$21 extendScopeForVars  (52)
+	attribScopeForVars : IDENT ATTRIB expression . $$21 extendScopeForVars  (56)
 	expression : expression . '+' expression  (85)
 	expression : expression . '-' expression  (86)
 	expression : expression . '*' expression  (87)
@@ -2467,180 +2460,175 @@ state 173
 	expression : expression . GEQ expression  (95)
 	expression : expression . '>' expression  (96)
 	expression : expression . NEQ expression  (97)
-	$$21 : .  (51)
+	$$21 : .  (55)
 
-	AND  shift 88
-	OR  shift 89
-	DIV  shift 90
-	MOD  shift 91
-	EQ  shift 92
-	NEQ  shift 93
-	LEQ  shift 94
-	GEQ  shift 95
-	'<'  shift 96
-	'>'  shift 97
-	'*'  shift 98
-	'+'  shift 99
-	'-'  shift 100
-	';'  reduce 51
-	','  reduce 51
+	AND  shift 93
+	OR  shift 94
+	DIV  shift 95
+	MOD  shift 96
+	EQ  shift 97
+	NEQ  shift 98
+	LEQ  shift 99
+	GEQ  shift 100
+	'<'  shift 101
+	'>'  shift 102
+	'*'  shift 103
+	'+'  shift 104
+	'-'  shift 105
+	';'  reduce 55
+	','  reduce 55
 
-	$$21  goto 179
+	$$21  goto 178
 
 
 state 174
 	counterForDecls : IDENT . operatorIncr listCounterForDecls  (75)
 
-	INCREMENT  shift 180
-	DECREMENT  shift 181
+	INCREMENT  shift 179
+	DECREMENT  shift 180
 	.  error
 
-	operatorIncr  goto 182
+	operatorIncr  goto 181
 
 
 state 175
-	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls . ')' $$10 statementElements  (32)
+	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls . ')' $$10 statement  (33)
 
-	')'  shift 183
+	')'  shift 182
 	.  error
 
 
 state 176
-	elseifStatement : ELSE statementElements .  (55)
-
-	.  reduce 55
-
-
-state 177
-	statementSwitchCase : ':' statementElements listSwitchCase .  (67)
+	statementSwitchCase : ':' statement listSwitchCase .  (67)
 
 	.  reduce 67
 
 
-state 178
-	statement : DO $$14 $$15 statementElements WHILE '(' expression $$16 ')' .  (40)
+state 177
+	statement : DO $$14 $$15 statement WHILE '(' expression $$16 ')' .  (41)
 
-	.  reduce 40
+	.  reduce 41
+
+
+state 178
+	attribScopeForVars : IDENT ATTRIB expression $$21 . extendScopeForVars  (56)
+	extendScopeForVars : .  (58)
+
+	','  shift 183
+	';'  reduce 58
+
+	extendScopeForVars  goto 184
 
 
 state 179
-	attribScopeForVars : IDENT ATTRIB expression $$21 . extendScopeForVars  (52)
-	extendScopeForVars : .  (54)
-
-	','  shift 184
-	';'  reduce 54
-
-	extendScopeForVars  goto 185
-
-
-state 180
 	operatorIncr : INCREMENT .  (79)
 
 	.  reduce 79
 
 
-state 181
+state 180
 	operatorIncr : DECREMENT .  (80)
 
 	.  reduce 80
 
 
-state 182
+state 181
 	counterForDecls : IDENT operatorIncr . listCounterForDecls  (75)
 	listCounterForDecls : .  (78)
 
-	','  shift 186
+	','  shift 185
 	')'  reduce 78
 
-	listCounterForDecls  goto 187
+	listCounterForDecls  goto 186
+
+
+state 182
+	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' . $$10 statement  (33)
+	$$10 : .  (32)
+
+	.  reduce 32
+
+	$$10  goto 187
 
 
 state 183
-	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' . $$10 statementElements  (32)
-	$$10 : .  (31)
+	extendScopeForVars : ',' . attribScopeForVars  (57)
 
-	.  reduce 31
+	IDENT  shift 154
+	.  error
 
-	$$10  goto 188
+	attribScopeForVars  goto 188
 
 
 state 184
-	extendScopeForVars : ',' . attribScopeForVars  (53)
+	attribScopeForVars : IDENT ATTRIB expression $$21 extendScopeForVars .  (56)
 
-	IDENT  shift 152
-	.  error
-
-	attribScopeForVars  goto 189
+	.  reduce 56
 
 
 state 185
-	attribScopeForVars : IDENT ATTRIB expression $$21 extendScopeForVars .  (52)
-
-	.  reduce 52
-
-
-state 186
 	listCounterForDecls : ',' . counterForDecls  (77)
 	counterForDecls : .  (76)
 
 	IDENT  shift 174
 	')'  reduce 76
 
-	counterForDecls  goto 190
+	counterForDecls  goto 189
 
 
-state 187
+state 186
 	counterForDecls : IDENT operatorIncr listCounterForDecls .  (75)
 
 	.  reduce 75
 
 
-state 188
-	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 . statementElements  (32)
+state 187
+	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 . statement  (33)
 
-	IDENT  shift 41
+	IDENT  shift 44
 	INT  shift 4
 	BOOL  shift 5
 	DOUBLE  shift 7
 	STRING  shift 8
-	SWITCH  shift 42
-	WHILE  shift 43
-	DO  shift 44
-	FOR  shift 45
-	IF  shift 46
-	RETURN  shift 47
-	BREAK  shift 48
-	CONTINUE  shift 49
-	'{'  shift 110
+	SWITCH  shift 45
+	WHILE  shift 46
+	DO  shift 47
+	FOR  shift 48
+	IF  shift 49
+	RETURN  shift 50
+	BREAK  shift 51
+	CONTINUE  shift 52
+	'{'  shift 53
 	.  error
 
-	typeVar  goto 50
-	statement  goto 111
-	scopeFunVarDecls  goto 53
-	attribWithExpr  goto 54
-	statementElements  goto 191
+	typeVar  goto 55
+	statement  goto 190
+	scopeFunVarDecls  goto 57
+	attribWithExpr  goto 58
+	ifStatement  goto 59
+	ifStatementWithoutElse  goto 60
+
+
+state 188
+	extendScopeForVars : ',' attribScopeForVars .  (57)
+
+	.  reduce 57
 
 
 state 189
-	extendScopeForVars : ',' attribScopeForVars .  (53)
-
-	.  reduce 53
-
-
-state 190
 	listCounterForDecls : ',' counterForDecls .  (77)
 
 	.  reduce 77
 
 
-state 191
-	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statementElements .  (32)
+state 190
+	statement : FOR '(' $$9 scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' $$10 statement .  (33)
 
-	.  reduce 32
-
-
-State 156 contains 1 shift/reduce conflict.
+	.  reduce 33
 
 
-47 terminals, 55 nonterminals
-107 grammar rules, 192 states
+State 60 contains 1 shift/reduce conflict.
+
+
+48 terminals, 55 nonterminals
+107 grammar rules, 191 states
