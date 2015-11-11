@@ -1,18 +1,18 @@
 
 public class SymbolType
 {
+    private String type;
     private String name;
-    private Object value;
 
-    public SymbolType(String type)
+    public SymbolType(String type, String name)
     {
-        this.name = type;
+        this.type = type;
+        this.name = name;
     }
 
-    public SymbolType(String type, Object value)
+    public String type()
     {
-        this.name  = type;
-        this.value = value;
+        return this.type;
     }
 
     public String name()
@@ -20,8 +20,13 @@ public class SymbolType
         return this.name;
     }
 
-    public Object value()
+    public SymbolType changeName(String name)
     {
-        return this.value;
+        return new SymbolType(this.type, name);
+    }
+
+    public boolean equals(SymbolType symbol)
+    {
+        return symbol.type == type && symbol.name == name;
     }
 }

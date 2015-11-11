@@ -32,7 +32,7 @@ Parser:
 	$(BYACCJ) grammar.yacc
 	$(JAVAC) ParserTokens.java
 	$(JAVAC) SymbolType.java
-	$(JAVAC) SymbolItem.java
+	$(JAVAC) SymbolTree.java
 	$(JAVAC) SymbolTable.java
 	$(JAVAC) ParserVal.java
 	$(JAVAC) Parser.java

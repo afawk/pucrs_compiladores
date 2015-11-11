@@ -1,4 +1,4 @@
-$TRACE_ON
+//$TRACE_ON
 
 int b;
 

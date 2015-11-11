@@ -18,30 +18,28 @@
 
 %start program
 
-%type <sval> IDENT FALSE TRUE NUM
-%type <obj> typeVar
-%type <obj> expression
-%type <obj> validCaseSwitch expressionWithFun
+%type <sval> IDENT FALSE TRUE NUM typeVar
+%type <obj> expression validCaseSwitch expressionWithFun
 
 %%
 
-program : declList
+program : { head = new SymbolTree(new SymbolType("_main", "_main")); } declList
         ;
 
-declList : typeVar IDENT { symbolType = (SymbolType) $1; symbolName = $2; } declarations
-         | VOID IDENT { symbolType = new SymbolType("void"); symbolName = $2; } methodDecl
+declList : typeVar IDENT { currentSymbol = new SymbolType($1, $2); } declarations
+         | VOID IDENT { currentSymbol = new SymbolType("void", $2); } methodDecl
          |
          ;
 
-declarations : ';' { symbolTable.addVar(symbolType, symbolName); } declList
-             | ',' { symbolTable.addVar(symbolType, symbolName); } listNameDecls ';' declList
+declarations : ';' { head = symbolTable.addVar(head, currentSymbol); } declList
+             | ',' { head = symbolTable.addVar(head, currentSymbol); } listNameDecls ';' declList
              | methodDecl
              ;
 
-methodDecl : '(' argsList ')' { symbolTable.addFunc(symbolType, symbolName); symbolTable.currentScope(symbolName); symbolType = null; } '{' statementList '}' declList
+methodDecl : '(' { symbolType = null; head = symbolTable.addFunc(head, currentSymbol); } argsList ')' '{' statementList '}' declList
            ;
 
-listNameDecls : IDENT { symbolTable.addVar(symbolType, $1); } nameDecls
+listNameDecls : IDENT { head = symbolTable.addVar(head, currentSymbol.changeName($1)); } nameDecls
               ;
 
 nameDecls : ',' listNameDecls
@@ -52,7 +50,7 @@ argsList : argRule argsListComma
          |
          ;
 
-argRule : typeVar IDENT { symbolTable.addArg(symbolName, (SymbolType) $1, $2); }
+argRule : typeVar IDENT { head = symbolTable.addArg(head, new SymbolType($1, $2)); }
         ;
 
 argsListComma : ',' argRule argsListComma
@@ -64,26 +62,42 @@ statementList : statement statementList
               |
               ;
 
-statement : scopeFunVarDecls ';'
-          | attribWithExpr ';'
-          | RETURN expression { symbolTable.validReturn(symbolName, (SymbolType) $2); } ';'
-          | FOR '(' scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' { symbolTable.scoppedLoopIncr(); }  statementElements
-          | WHILE '(' expression { symbolTable.validTypesLogic((SymbolType) $3); } ')' { symbolTable.scoppedLoopIncr(); } statementElements
-          | DO { symbolTable.scoppedLoopIncr(); } statementElements WHILE '(' expression { symbolTable.validTypesLogic((SymbolType) $6); } ')'
-          | IF '(' expression { symbolTable.validTypesLogic((SymbolType) $3); } ')' elseifStatement
+statement : scopeFunVarDecls ';' { symbolType = null; }
+          | attribWithExpr ';' { symbolType = null; }
+          | RETURN expression { symbolTable.validReturn(head, (SymbolType) $2); } ';'
+          | FOR '(' { head = symbolTable.addScope(head, "for"); } scopeForVarDecls ';' expressionForDecls ';' counterForDecls ')' { symbolTable.scoppedLoopIncr(); }  statementElements
+          | WHILE  { head = symbolTable.addScope(head, "while"); } '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $4); } ')' { symbolTable.scoppedLoopIncr(); } statementElements
+          | DO  { head = symbolTable.addScope(head, "do-while"); } { symbolTable.scoppedLoopIncr(); } statementElements WHILE '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $7); } ')'
+          | IF '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $3); } ')' statementElements elseifStatement
           | BREAK { symbolTable.scoppedLoopCheck("break"); } ';'
           | CONTINUE { symbolTable.scoppedLoopCheck("continue"); } ';'
           | SWITCH '(' expression ')' '{' listSwitchCase '}'
           ;
+
+scopeForVarDecls : typeVar { symbolType = $1; } attribScopeForVars
+                 |
+                 ;
+
+attribScopeForVars : IDENT ATTRIB expression { symbolTable.addVar(head, new SymbolType(symbolType, $1), (SymbolType) $3); } extendScopeForVars
+                   ;
+
+extendScopeForVars : ',' attribScopeForVars
+                   |
+                   ;
 
 elseifStatement : ELSE statementElements
                 |
                 ;
 
 attribWithExpr : IDENT ATTRIB expression {
-  if (symbolType != null) { symbolTable.addVar(symbolType, $1, (SymbolType)$3); symbolType = null; }
-  else {symbolTable.addValueVar($1, (SymbolType)$3);}
-}
+  if (symbolType == null) {
+    symbolTable.addVar(head, new SymbolType(symbolTable.searchTypeFunc(head, $1), $1), (SymbolType) $3);
+  }
+  else {
+    symbolTable.addVar(head, new SymbolType(symbolType, $1), (SymbolType) $3);
+  }
+
+ }
                ;
 
 statementElements : statement
@@ -95,16 +109,16 @@ listSwitchCase : CASE validCaseSwitch statementSwitchCase
                |
                ;
 
-validCaseSwitch : IDENT   { $$ = symbolTable.modelateResult($1); }
-                | NUM     { $$ = symbolTable.modelateResult($1); }
-                | TRUE    { $$ = symbolTable.modelateResult($1); }
-                | FALSE   { $$ = symbolTable.modelateResult($1); }
+validCaseSwitch : IDENT   { $$ = symbolTable.modelateResult(head, new SymbolType("ident", $1)); }
+                | NUM     { $$ = symbolTable.modelateResult(head, new SymbolType("num", $1)); }
+                | TRUE    { $$ = new SymbolType("bool", $1); }
+                | FALSE   { $$ = new SymbolType("bool", $1); }
                 ;
 
 statementSwitchCase : ':' statementElements listSwitchCase
                     ;
 
-scopeFunVarDecls : typeVar { symbolType = (SymbolType) $1; } listScopeFunVar
+scopeFunVarDecls : typeVar { symbolType = $1; } listScopeFunVar
                  ;
 
 listScopeFunVar : attribWithExpr extendListScopeFunVar
@@ -114,18 +128,7 @@ extendListScopeFunVar : ',' listScopeFunVar
                       |
                       ;
 
-scopeForVarDecls : typeVar attribScopeForVars
-                 |
-                 ;
-
-attribScopeForVars : IDENT ATTRIB expression extendScopeForVars
-                   ;
-
-extendScopeForVars : ',' attribScopeForVars
-                   |
-                   ;
-
-expressionForDecls : expression { symbolTable.validTypesLogic((SymbolType) $1); }
+expressionForDecls : expression { symbolTable.validTypesLogic(head, (SymbolType) $1); }
                    |
                    ;
 
@@ -141,7 +144,7 @@ operatorIncr : INCREMENT
              | DECREMENT
              ;
 
-expressionWithFun : IDENT '(' argsSourceList ')' { $$ = symbolTable.searchTypeFunc($1); }
+expressionWithFun : IDENT '(' argsSourceList ')' { $$ = new SymbolType(symbolTable.searchTypeFunc(head, $1), $1); }
                   ;
 
 argsSourceList : expression expressionList
@@ -151,42 +154,45 @@ expressionList : ',' argsSourceList
                |
                ;
 
-expression : expression '+' expression { $$ = symbolTable.validTypesArit((SymbolType) $1, (SymbolType) $3); }
-           | expression '-' expression  { $$ = symbolTable.validTypesArit((SymbolType) $1, (SymbolType) $3); }
-           | expression '*' expression  { $$ = symbolTable.validTypesArit((SymbolType) $1, (SymbolType) $3); }
-           | expression DIV expression  { $$ = symbolTable.validTypesArit((SymbolType) $1, (SymbolType) $3); }
-           | expression MOD expression  { $$ = symbolTable.validTypesArit((SymbolType) $1, (SymbolType) $3); }
-           | expression OR expression  { $$ = symbolTable.validTypesLogic((SymbolType) $1, (SymbolType) $3); }
-           | expression AND expression  { $$ = symbolTable.validTypesLogic((SymbolType) $1, (SymbolType) $3); }
-           | expression '<' expression  { $$ = symbolTable.validTypesComp((SymbolType) $1, (SymbolType) $3); }
-           | expression LEQ expression  { $$ = symbolTable.validTypesComp((SymbolType) $1, (SymbolType) $3); }
-           | expression EQ expression  { $$ = symbolTable.validTypesComp((SymbolType) $1, (SymbolType) $3); }
-           | expression GEQ expression  { $$ = symbolTable.validTypesComp((SymbolType) $1, (SymbolType) $3); }
-           | expression '>' expression  { $$ = symbolTable.validTypesComp((SymbolType) $1, (SymbolType) $3); }
-           | expression NEQ expression  { $$ = symbolTable.validTypesComp((SymbolType) $1, (SymbolType) $3); }
-           | NOT expression { $$ = symbolTable.validTypesLogic((SymbolType) $2); }
+expression : expression '+' expression { $$ = symbolTable.validTypesArit(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression '-' expression  { $$ = symbolTable.validTypesArit(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression '*' expression  { $$ = symbolTable.validTypesArit(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression DIV expression  { $$ = symbolTable.validTypesArit(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression MOD expression  { $$ = symbolTable.validTypesArit(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression OR expression  { $$ = symbolTable.validTypesLogic(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression AND expression  { $$ = symbolTable.validTypesLogic(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression '<' expression  { $$ = symbolTable.validTypesComp(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression LEQ expression  { $$ = symbolTable.validTypesComp(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression EQ expression  { $$ = symbolTable.validTypesComp(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression GEQ expression  { $$ = symbolTable.validTypesComp(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression '>' expression  { $$ = symbolTable.validTypesComp(head, (SymbolType) $1, (SymbolType) $3); }
+           | expression NEQ expression  { $$ = symbolTable.validTypesComp(head, (SymbolType) $1, (SymbolType) $3); }
+           | NOT expression { $$ = symbolTable.validTypesLogic(head, (SymbolType) $2); }
            | '(' expression ')' { $$ = (SymbolType) $2; }
            | expressionWithFun
-           | validCaseSwitch
+           | validCaseSwitch { $$ = (SymbolType) $1; }
            ;
 
-typeVar : DOUBLE { $$ = new SymbolType("double"); }
-        | BOOL { $$ = new SymbolType("bool"); }
-        | INT { $$ = new SymbolType("int"); }
-        | STRING { $$ = new SymbolType("string"); }
-        | IDENT { $$ = new SymbolType("ident"); }
+typeVar : DOUBLE { $$ = "double"; }
+        | BOOL { $$ = "bool"; }
+        | INT { $$ = "int"; }
+        | STRING { $$ = "string"; }
+        | IDENT { $$ = "ident"; }
         ;
 
 // codigo
 %%
 
   private SymbolTable symbolTable;
+  private SymbolTree head;
 
   private Yylex lexer;
   int yyl_return;
 
-  private SymbolType symbolType;
+  private String symbolType;
+  private SymbolType currentSymbol;
   private String symbolName;
+  private String scopeCode = "";
 
   public int yylex () {
     try {

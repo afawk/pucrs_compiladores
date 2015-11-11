@@ -5,7 +5,7 @@ int calculaFreq(int aulas, int faltas) {
 }
 
 bool calcula(int g1, int aulas, int faltas) {
-    bool fazG2 = 0;
+    bool fazG2 = false;
     fazG2 =  !(g1<4) && (g1<7) && !(calculaFreq(aulas,faltas)<75/100);
     return fazG2;
 }

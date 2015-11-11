@@ -7,22 +7,22 @@ int looping(int x, int m) {
     for (int n = 0, g = 0; n < (m + 1); n++) {
         g = g + 1;
 
-        t = (g > 10);
+        //t = (g > 10); // isso não funciona \o/
 
-        if (t) {
+        if (t > 0) {
             break;
         }
     }
 
-    if (t) {
+    if (t == 0) {
         return g;
     }
 
-    return x;
+    return t;
 }
 
 double teste(int x, bool y) {
-    int j = 1;
+    double j = 1.0;
     int k = looping(1, a + x);
 
     if (j > k) {
