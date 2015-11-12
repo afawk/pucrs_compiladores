@@ -1,3 +1,10 @@
+/*
+*
+* Trabalho 04 Compiladores
+* Anderson Fraga - 13180375
+* contato@andersonfraga.net
+*
+*/
 
 import java.util.HashSet;
 
@@ -61,7 +68,7 @@ public class SymbolTree
         return parent.searchAndGetByName(name);
     }
 
-    public boolean existsUnchained(SymbolType symbol)
+    public boolean existsUnlinked(SymbolType symbol)
     {
         for (SymbolType _sym : unlinked) {
             if (_sym.equals(symbol)) {
@@ -70,7 +77,7 @@ public class SymbolTree
         }
 
         for (SymbolTree _tree : childs) {
-            if (_tree.existsUnchained(symbol)) {
+            if (_tree.existsUnlinked(symbol)) {
                 return true;
             }
         }
@@ -78,7 +85,7 @@ public class SymbolTree
         return false;
     }
 
-    public boolean existsChained(SymbolType symbol)
+    public boolean existsChild(SymbolType symbol)
     {
         if (parent == null) {
             return false;
@@ -89,7 +96,7 @@ public class SymbolTree
         }
 
         for (SymbolTree _tree : childs) {
-            if (_tree.existsChained(symbol)) {
+            if (_tree.existsChild(symbol)) {
                 return true;
             }
         }
@@ -99,6 +106,6 @@ public class SymbolTree
 
     public boolean exists(SymbolType symbol)
     {
-        return existsChained(symbol) || existsUnchained(symbol);
+        return existsChild(symbol) || existsUnlinked(symbol);
     }
 }

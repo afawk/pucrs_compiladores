@@ -1,7 +1,9 @@
-/**
-* Anderson Jean Fraga
-* 13180375
-* Compiladores - Trabalho 3
+/*
+*
+* Trabalho 04 Compiladores
+* Anderson Fraga - 13180375
+* contato@andersonfraga.net
+*
 */
 
 %%

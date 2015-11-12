@@ -1,5 +1,14 @@
 
 %{
+
+/*
+*
+* Trabalho 04 Compiladores
+* Anderson Fraga - 13180375
+* contato@andersonfraga.net
+*
+*/
+
   import java.io.*;
 %}
 
@@ -71,9 +80,9 @@ statement : '{' statementList '}'
           | WHILE  { head = symbolTable.addScope(head, "while"); } '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $4); } ')' { symbolTable.scoppedLoopIncr(); } statement
           | DO  { head = symbolTable.addScope(head, "do-while"); } { symbolTable.scoppedLoopIncr(); } statement WHILE '(' expression { symbolTable.validTypesLogic(head, (SymbolType) $7); } ')'
           | ifStatement
-          | BREAK { symbolTable.scoppedLoopCheck("break"); } ';'
-          | CONTINUE { symbolTable.scoppedLoopCheck("continue"); } ';'
-          | SWITCH '(' expression ')' '{' listSwitchCase '}'
+          | BREAK { symbolTable.scoppedLoopCheck(head, "break"); } ';'
+          | CONTINUE { symbolTable.scoppedLoopCheck(head, "continue"); } ';'
+          | SWITCH { head = symbolTable.addScope(head, "switch"); } '(' expression ')' '{' listSwitchCase '}'
           ;
 
 ifStatement : ifStatementWithoutElse %prec NO_ELSE

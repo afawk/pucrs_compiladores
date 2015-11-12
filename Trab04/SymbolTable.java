@@ -1,3 +1,10 @@
+/*
+*
+* Trabalho 04 Compiladores
+* Anderson Fraga - 13180375
+* contato@andersonfraga.net
+*
+*/
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -230,10 +237,19 @@ public class SymbolTable
         scopeLoop++;
     }
 
-    public void scoppedLoopCheck(String identifier)
+    public void scoppedLoopCheck(SymbolTree scope, String identifier)
     {
-        if (scopeLoop == 0) {
-            fatalError("Nenhum loop localizado para uso de '"+identifier+"', na linha "+getLine());
+        if (identifier.equals("continue") &&
+            !(scope.current().name().equals("for") ||
+              scope.current().name().equals("do-while") ||
+              scope.current().name().equals("while")
+            )
+        ) {
+            fatalError("Nenhum loop localizado para uso de 'continue', na linha "+getLine());
+        }
+
+        if (!scope.current().type().equals("loop")) {
+            fatalError("Nenhum loop/switch localizado para uso de '"+identifier+"', na linha "+getLine());
         }
 
         scopeLoop--;

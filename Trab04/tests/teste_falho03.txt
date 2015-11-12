@@ -1,0 +1,21 @@
+
+int a;
+
+void main(int b) {
+    switch(b) {
+        case 1:{
+            b = 12;
+            continue; // falha aqui :)
+        }
+        case 2: {
+            if (a > 1) {
+                a = 10;
+            }
+
+            break;
+        }
+
+        default:
+            a = b;
+    }
+}

@@ -1,3 +1,10 @@
+##
+#
+# Trabalho 04 Compiladores
+# Anderson Fraga - 13180375
+# contato@andersonfraga.net
+#
+##
 
 JFLEX  = jflex
 BYACCJ = byaccj -tv -J
@@ -11,15 +18,14 @@ run: author Parser
 rebuild: author clean Parser
 
 help:
-	@echo $$ make help \(this\)
 	@echo $$ make \(rebuild only changes\)
 	@echo $$ make rebuild \(clean and compile\)
 	@echo $$ make clean \(clean only\)
 	@echo $$ java Parser testfile.txt \(run testfile.txt test file\)
 
 author:
+	@echo ------ Trabalho 04 Compiladores
 	@echo ------ Anderson Fraga - 13180375
-	@echo ------ $$ make help \(more options\)
 	@echo
 
 clean:

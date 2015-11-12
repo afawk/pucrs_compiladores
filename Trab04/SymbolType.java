@@ -1,3 +1,10 @@
+/*
+*
+* Trabalho 04 Compiladores
+* Anderson Fraga - 13180375
+* contato@andersonfraga.net
+*
+*/
 
 public class SymbolType
 {

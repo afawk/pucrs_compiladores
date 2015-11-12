@@ -1,4 +1,3 @@
-$TRACE_OFF
 
 unexpectedtype a;
 
